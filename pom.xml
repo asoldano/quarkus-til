@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+    <groupId>io.quarkiverse</groupId>
+    <artifactId>quarkiverse-parent</artifactId>
+    <version>16</version>
+    </parent>
+
+    <artifactId>quarkus-samples-til</artifactId>
+    <name>Quarkus TIL</name>
+    <version>1.0.0-SNAPSHOT</version>
+
+<properties>
+    <quarkus.version>3.7.3</quarkus.version>
+    <quarkus.langchain.version>0.8.2</quarkus.langchain.version>
+    <langchain4j.version>0.27.1</langchain4j.version>
+    <langchain4j-embeddings.version>0.27.1</langchain4j-embeddings.version>
+    <quarkus-poi.version>2.0.4</quarkus-poi.version> <!-- we need to use this version because langchain4j uses POI 5.2.3 instead of 5.2.5 and the substitution needed is different in the two versions -->
+    <assertj.version>3.25.3</assertj.version>
+    <wiremock.version>3.3.1</wiremock.version>
+    <pgvector-java.version>0.1.4</pgvector-java.version>
+    <sundrio.version>0.103.1</sundrio.version>
+    <infinispan.version>15.0.0.Dev09</infinispan.version>
+  </properties>
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>io.quarkus</groupId>
+        <artifactId>quarkus-bom</artifactId>
+        <version>${quarkus.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>dev.langchain4j</groupId>
+        <artifactId>langchain4j-bom</artifactId>
+        <version>${langchain4j.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+
+    <dependencies>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-resteasy-reactive-jackson</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkiverse.langchain4j</groupId>
+            <artifactId>quarkus-langchain4j-openai</artifactId>
+            <version>${quarkus.langchain.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkiverse.langchain4j</groupId>
+            <artifactId>quarkus-langchain4j-openai-deployment</artifactId>
+            <version>${quarkus.langchain.version}</version>
+        </dependency>
+
+        <!-- UI -->
+        <dependency>
+            <groupId>org.mvnpm</groupId>
+            <artifactId>importmap</artifactId>
+            <version>1.0.8</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mvnpm.at.mvnpm</groupId>
+            <artifactId>vaadin-webcomponents</artifactId>
+            <version>24.3.1</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mvnpm</groupId>
+            <artifactId>es-module-shims</artifactId>
+            <scope>runtime</scope>
+            <version>1.8.2</version>
+        </dependency>
+    </dependencies>
+
+<build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>io.quarkus</groupId>
+          <artifactId>quarkus-maven-plugin</artifactId>
+          <version>${quarkus.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>net.revelc.code</groupId>
+          <artifactId>impsort-maven-plugin</artifactId>
+          <version>${version.impsort.plugin}</version>
+          <configuration>
+            <compliance>17</compliance>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+    <plugins>
+      <plugin>
+        <groupId>io.sundr</groupId>
+        <artifactId>sundr-maven-plugin</artifactId>
+        <version>${sundrio.version}</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>generate-bom</goal>
+            </goals>
+            <configuration>
+              <boms>
+                <bom>
+                  <artifactId>quarkus-langchain4j-bom</artifactId>
+                  <name>Quarkus LangChain4j : BOM</name>
+                  <description>Centralized dependencyManagement for the Quarkus LangChain4j Project</description>
+                  <properties>
+                    <skipStagingRepositoryClose>true</skipStagingRepositoryClose>
+                    <sonar.skip>true</sonar.skip>
+                  </properties>
+                  <modules>
+                    <excludes>
+                    </excludes>
+                  </modules>
+                  <extraDependencies>
+                    <dependency>
+                      <groupId>dev.langchain4j</groupId>
+                      <artifactId>langchain4j-milvus</artifactId>
+                      <version>${langchain4j.version}</version>
+                      <exclusions>
+                        <exclusion>
+                          <groupId>com.google.android</groupId>
+                          <artifactId>annotations</artifactId>
+                        </exclusion>
+                        <exclusion>
+                          <groupId>org.apache.logging.log4j</groupId>
+                          <artifactId>log4j-slf4j-impl</artifactId>
+                        </exclusion>
+                        <exclusion>
+                          <groupId>org.checkerframework</groupId>
+                          <artifactId>checker-qual</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>org.codehaus.mojo</groupId>
+                            <artifactId>animal-sniffer-annotations</artifactId>
+                        </exclusion>
+                      </exclusions>
+                    </dependency>
+
+                    <dependency>
+                      <groupId>dev.langchain4j</groupId>
+                      <artifactId>langchain4j-bom</artifactId>
+                      <version>${langchain4j.version}</version>
+                      <type>pom</type>
+                      <scope>import</scope>
+                    </dependency>
+                  </extraDependencies>
+                </bom>
+              </boms>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+                <groupId>io.quarkus</groupId>
+                <artifactId>quarkus-maven-plugin</artifactId>
+                <version>${quarkus.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>build</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.2.5</version>
+                <configuration>
+                    <systemPropertyVariables>
+                        <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
+                        <maven.home>${maven.home}</maven.home>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+    </plugins>
+  </build>
+  <profiles>
+    <profile>
+            <id>native</id>
+            <activation>
+                <property>
+                    <name>native</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <version>3.2.5</version>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>integration-test</goal>
+                                    <goal>verify</goal>
+                                </goals>
+                                <configuration>
+                                    <systemPropertyVariables>
+                                        <native.image.path>${project.build.directory}/${project.build.finalName}-runner</native.image.path>
+                                        <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
+                                        <maven.home>${maven.home}</maven.home>
+                                    </systemPropertyVariables>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+            <properties>
+                <quarkus.package.type>native</quarkus.package.type>
+            </properties>
+        </profile>
+  </profiles>
+
+
+
+
+</project>
